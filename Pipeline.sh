@@ -44,5 +44,5 @@ cp $DATA /fastqc_results
 #Change the path
 cd fastqc_results
 
-#Run fastqc on fastq file to check the quiality of the reads in the file and to assess whether or not data trimming needs to be done
+#Run fastqc on fastq file to check the quality of the reads in the file and to assess whether or not data trimming needs to be done
 ./$TOOL_FASTQC $DATA > Fastqc_results.txt
