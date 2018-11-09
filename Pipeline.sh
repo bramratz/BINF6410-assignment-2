@@ -1,6 +1,6 @@
 #!/bin/bash
 ==============================
-Assignemnt information
+Assignment information
 ==============================
 """
 The goal of this assignment is to develop a pipeline to go from raw sequencing data (fastq) to a Genotype Table (VCF)
