@@ -12,6 +12,10 @@ module load sabre
 
 module load Platypus
 
+echo =====================================
+#asking for user imput
+echo =====================================
+
 #loading required fastqc files
 #get users name
 echo 'What would you like to be called?'
