@@ -5,6 +5,6 @@
 
 [name] is a pipeline designed to be used with fastq type files containing genomic information which returns a variant calling formart (VCF) file. However, the following intermediary file types may be used as well:
 
-..*.BAM
-..*.SAM
-..*.VCF
+..* .BAM
+..* .SAM
+..* .VCF
