@@ -1,48 +1,394 @@
 #!/bin/bash
-==============================
-Assignment information
-==============================
-"""
-The goal of this assignment is to develop a pipeline to go from raw sequencing data (fastq) to a Genotype Table (VCF)
-Completed by Bram Ratz, Gurkamal Deol, Shalini Suraj, and Ian Lee
-"""
+
+#Who is using this pipeline
+echo Hello, who am I talking to?
+read USER_NAME
+echo "Hello $USER_NAME – It’s nice to meet you! Please load the modules below."
+
 echo =====================================
 #Packages to import
 echo =====================================
 
-#Load modules that we are going to use in this pipeline TESTESTESTEST
+#load modules that we are going to use in this pipeline (used the ones in the profs script becasue couldn't fins the versions in mine, will have to change them if needed)
+#so at the moment each time i need a package I'm simply asking the user to give me the path to each one. But if we can figure out how to add this part then we could remove then we wouldnt have to ask for individual packages could simply call up each program as we need it
 
-module load fastqc
+modules load bwa/0.7.13
+modules load samtools/1.3
+modules load vcftools/0.1.12b
+modules load platypus/0.8.1
+modules load python/3.5
+modules load sabre/1.000
+modules load cutadapt
+modules load FastQC/0.11.5
+modules load sickle/1.33-2
 
-module load sabre
+echo ===================================
+#making a directory to be our new working directory for this session
+echo ===================================
 
-module load Platypus
+#make directory "variant calling"
+mkdir -v 'variant calling'
 
-#Loading required fastqc files
-#Get users name
-echo 'What would you like to be called?'
-read usrname
+#move to 'variant calling'
+cd 'variant calling'
 
-#Need user to tell us where the fastq files are and provide the path to them
-echo '$usrname what is the path to your fastq file'
-read FASTQ
-  DATA=$FASTQ
-echo
+#make directories for our ref genome and fastq file(s)
+mkdir -v 'ref genome'
+mkdir -v 'fastq files'
+mkdir -v 'trimmed reads'
 
-#Need path to fastqc
-echo '$usrname what is the path to fastqc'
-read fastqc
-  TOOL_FASTQC=$fastqc
-echo
+echo ==================================
+#Download ref genome and fastq files
+echo ==================================
 
-#Create directory for results of analysis
-mkdir -pv fastqc_results
+#Download ref genome (I'm assumiung this is user choice, if not can just change to something that is automaticly called up)
+echo "Please upload path to a reference genome"
+read reference_genome
+  REF=$reference_genome
 
-#Copy fastq data there
-cp $DATA /fastqc_results
+#Move to appropriate directory
+mv REF /'ref genome'/
 
-#Change the path
-cd fastqc_results
+echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#Alternative to above could download from ncbi
+#Ask for URL
+echo 'upload URL for reference genome'
 
-#Run fastqc on fastq file to check the quality of the reads in the file and to assess whether or not data trimming needs to be done
-./$TOOL_FASTQC $DATA > Fastqc_results.txt
+read referecne_genome
+  REFERENCE_URL=$referecne_genome
+
+#Download
+echo "Starting reference genome download"
+curl -s0 $REFERENCE_URL
+echo "Download Complete"
+
+echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+#Now need the user to load a fastq file for us
+echo 'Enter the path to a fastq file'
+read fastq_file
+  FASTQ_RAW=fastq_file
+
+#Move to appropriate directory
+mv $FASTQ_RAW 'fastq files'/
+
+echo =================================
+#Use FastQC program to analyze the quality of the reads
+echo =================================
+
+#First have to ask the user to find the FastQC program in their computer and provide the path
+echo 'Enter the path to FastQC in your computer'
+read FastQC
+  TOOL_FASTQC=$FastQC
+
+#Run the FastQC program with the fastq data
+echo 'running FastQC'
+
+$TOOL_FASTQC 'fastq files'/$FASTQ_RAW
+
+echo 'Done'
+
+#FastQC creates a .html file that can be viewed in a web browser this section gives the option to view the .html file or continue
+#**I'm not sure if this stops the pipeline if you pick yes tbh**
+
+read -p "Would you like to view the FastQC summary? If [y] will open another window, if [n] will continue [y/n]" choice
+  case "$choice" in
+    y|Y ) xdg-open 'fastq files'/*.html;;
+    n|N ) exit;;
+    * ) echo "invalid, only single characters are accepted as a response"
+  esac
+
+echo =================================
+#use Sabre for demultiplexing
+echo =================================
+
+
+echo ==================================
+#Use sickle program to trim fastq files
+echo ==================================
+
+#First have to ask the user to find the sickle program on their computer and provide the path
+echo 'Enter the path to sickle in your computer'
+read sickle
+  TOOL_SICKLE=$sickle
+
+#Run the sickle program with the fastq data
+echo 'Running sickle'
+
+for files in ['fastq files'/*.fastq]
+  do
+    $TOOL_SICKLE se -f $files -t illumina -o FASTQ_TRIMMED.fastq
+    echo 'done'
+
+    if 'done'
+
+    then
+      exit 0
+
+    fi
+
+done
+
+#**above is alittle complicated, the idea is that if theres more than one file then it should apply the sickle program to all of them before finishing the loop**
+#**this is simpler and just takes some of the file and applies sickle to it**
+
+echo 'Running sickle'
+
+$TOOL_SICKLE se -f 'fastq files'/FASTQ_RAW -t illumina -o FASTQ_TRIMMED.fastq
+
+echo "Done"
+#move the trimmed reads to a different directory
+mv FASTA_TRIMMED 'trimmed reads'/
+
+echo ================================
+#Align reads to reference genome BWA
+echo ================================
+
+#so to start we have to be in the main directory 'variant calling'
+#need to load paths for BWA and samtools
+echo 'Enter the path to BWA on your computer'
+read bwa
+  TOOL_BWA=$bwa
+
+echo 'Enter the path to samtools on your computer'
+read samtools
+  TOOL_SAMTOOLS=$samtools
+
+#remember that we assigned our reference genome to the variable $REF, but want to have a variable that includes the path to this to make it easier
+WORKING_REF='ref genome'/$REF
+
+#now need to index our reference genome for bwa and samtools
+$TOOL_BWA index $WORKING_REF
+
+$TOOL_SAMTOOLS index $WORKING_REF
+
+#now lets create some output paths for intermediate and final result files
+mkdir -pv results/sai
+mkdir -pv results/sam
+mkdir -pv results/bam
+
+#now going to create a for loop to run the variant calling workflow on however many fastq files we have
+#remember the files we are using are in the 'trimmed reads' directory and are called FASTQ_TRIMMED.fq
+#this should be able to handle as many files as possible
+
+for reads in 'trimmed reads'/*.fq
+  do
+    NAME=$(basename $reads .fq) #extracts the name of the file without the path and the .fq extention and assigns it to the variable name
+    echo "working with $NAME"
+
+      echo "assign file names to variables to make this less comfusing"
+
+      FQ='trimmed reads'/$NAME\.fastq
+      SAI=results/sai/$NAME\_aligned.sai
+      SAM=results/sam/$NAME\_aligned.sam
+      BAM=results/bam/$NAME\_aligned.bam
+      SORTED_BAM=results/bam/$NAME\_aligned_sorted.bam
+
+      #data can now be moved easily with variables
+      #align the reads with BWA
+
+      $TOOL_BWA aln $WORKING_REF $FQ > $SAI
+
+      #convert the output to the SAM formate
+
+      $TOOL_BWA samse $WORKING_REF $SAI $FQ > $SAM
+
+      #SAM to BAM
+
+      $TOOL_SAMTOOLS view -S -b $SAM > $BAM
+
+      #sort the BAM file - not sure if this is necessary but everything online seems to do it
+      #the -f simply ignores upper and lower case for sorting
+
+      $TOOL_SAMTOOLS sort -f $BAM $SORTED_BAM
+
+      #they also index them everywhere online and the command is simple enough so lets do that
+
+      $TOOL_SAMTOOLS index $SORTED_BAM
+
+done
+
+#====================
+#Scripts for programs -- Default parameters to be changed?
+#====================
+
+#===================
+#PLATYPUS Script
+#===================
+DATA=/home/dator/NGS/bamlist
+REF=/home/dator/refgenome/Gmax_275_v2.0.fa
+PLAT=/home/dator/programs/Platypus_0.8.1/Platypus.py
+OUT=variantcalling
+CPU=4
+
+mkdir results
+cd results
+
+exec &> platypus.log
+
+python $PLAT callVariants --bamFiles="$DATA" \
+	    --nCPU="$CPU" --minMapQual=20 --minBaseQual=10 \
+	    --minGoodQualBases=5 --badReadsThreshold=10 \
+	    --rmsmqThreshold=20 --abThreshold=0.01 --maxReadLength=250  --hapScoreThreshold=20 \
+	    --trimAdapter=0 --maxGOF=20 \
+	    --minReads=50 --minFlank=5 \
+	    --sbThreshold=0.01 --scThreshold=0.95 --hapScoreThreshold=15 \
+	    --filterDuplicates=0 \
+	    --filterVarsByCoverage=0 --filteredReadsFrac=0.7 --minVarFreq=0.002 \
+	    --mergeClusteredVariants=0 --filterReadsWithUnmappedMates=0 \
+	    --refFile="$REF" \
+	    --logFileName=plat.log \
+	    --output="$OUT".vcf
+		if [ $? -ne 0 ]
+			then
+				printf "There is a problem at the platypus step"
+				exit 1
+		fi
+#======================
+#End of PLATYPUS Script
+#================#
+
+#============================
+#Platypus default parameters
+#============================
+#minMapQual
+echo "Which parameters would you like to use with PLATYPUS? If you choose <enter> at any point, the default parameter listed [#] will be used"
+read -p "minMapQual? [20]" minMQUAL
+while [[ -z $minMQUAL ]]; do
+  minMQUAL="20"
+done
+echo "Selected minMapQual: $minMQUAL"
+#minBaseQual
+read -p "minBaseQual? [10]" minBQUAL
+while [[ -z $minBQUAL ]]; do
+  minBQUAL="10"
+done
+echo "Selected minBaseQual: $minBQUAL"
+#minGoodQualBases
+read -p "minGoodQualBases? [5]" minGQbases
+while [[ -z $minGQbases  ]]; do
+  minGQbases="5"
+done
+echo "Selected minGoodQualBases: $minGQbases"
+#badReadsThreshold
+read -p "badReadsThreshold? [10]" badRthresh
+while [[ -z $badRthresh  ]]; do
+  badRthresh="10"
+done
+echo "Selected badReadsThreshold: $badRthresh"
+#rmsmqThreshold
+read -p "rmsmqThreshold? [20]" rmsmqThresh
+while [[ -z $rmsmqThresh ]]; do
+  rmsmqThresh="20"
+done
+echo "Selected rmsmqThreshold: $rmsmqThresh"
+#abThreshold
+read -p "abThreshold? 0.01" abThresh
+while [[ -z $abThresh ]]; do
+  abThresh="0.01"
+done
+echo "Selected abThreshold: $abThresh"
+#maxReadLength
+read -p "maxReadLength? [250]" maxRL
+while [[ -z $maxRL ]]; do
+  maxRL="250"
+done
+echo "Selected maxReadLength: $maxRL"
+#hapScoreThreshold
+read -p "hapScoreThreshold? [20]" hapSthresh
+while [[ -z $hapSthresh ]]; do
+  hapSthresh="20"
+done
+echo "Selected hapScoreThreshold: $hapSthresh"
+#trimAdapter
+read -p "trimAdapter? [0]" trimad
+while [[ -z $trimad ]]; do
+  trimad="0"
+done
+echo "Selected trimAdapter: $trimad"
+#macGOF
+read -p "maxGOF? [20]" maxG
+while [[ -z $maxG ]]; do
+  maxG="20"
+done
+echo "Selected macGOF: $maxG"
+#minReads
+read -p "minReads? [50]" minR
+while [[ -z $minR ]]; do
+  minR="50"
+done
+echo "Selected minReads: $minR"
+#minFlank
+read -p "minFlank? [20]" minF
+while [[ -z $minF ]]; do
+  minF="20"
+done
+echo "Selected minFlank: $minF"
+#sbThreshold
+read -p "sbThreshold? [0.01]" sbThresh
+while [[ -z $sbThresh ]]; do
+  sbThresh="0.01"
+done
+echo "Selected sbThreshold: $sbThresh"
+#scThreshold
+read -p "scThreshold? [0.95]" scThresh
+while [[ -z $scThresh ]]; do
+  scThresh="0.95"
+done
+echo "Selected scThreshold: $scThresh"
+#filterDuplicates
+read -p "filterDuplicates? [0]" filtdup
+while [[ -z $filtdup ]]; do
+  filtdup="0"
+done
+echo "Selected filterDuplicates: $filtdup"
+#filterVarsByCoverage
+read -p "filterVarsByCoverage? [0]" filtvarcov
+while [[ -z $filtvarcov ]]; do
+  filtvarcov="0"
+done
+echo "Selected filterVarsByCoverage: $filtvarcov"
+#filteredReadsFrac
+read -p "filteredReadsFrac? [0.7]" filtrfrac
+while [[ -z $filtrfrac ]]; do
+  filtrfrac="0.7"
+done
+echo "Selected filteredReadsFrac: $filtrfrac"
+#minVarFreq
+read -p "minVarFreq? [0.002]" minvfreq
+while [[ -z $minvfreq ]]; do
+  minvfreq="0.002"
+done
+echo "Selected minVarFreq: $minvfreq"
+#mergeClusteredVariants
+read -p "mergeClusteredVariants? [0]" mergeCvar
+while [[ -z $mergeCvar ]]; do
+  mergeCvar="0"
+done
+echo "Selected mergeClusteredVariants: $mergeCvar"
+#filterReadsWithUnmappedMates
+read -p "filterReadsWithUnmappedMates? [0]" filtnomatch
+while [[ -z $filtnomatch ]]; do
+  filtnomatch="0"
+done
+echo "Selected filterReadsWithUnmappedMates: $filtnomatch"
+
+
+python $PLAT callVariants --bamFiles="$DATA" \
+	    --nCPU="$CPU" --minMapQual=$minMQUAL --minBaseQual=$minBQUAL \
+	    --minGoodQualBases=$minGQbases --badReadsThreshold=$badRthresh \
+	    --rmsmqThreshold=$rmsmqThresh --abThreshold=$abThresh --maxReadLength=$maxRL  --hapScoreThreshold=$hapSthresh \
+	    --trimAdapter=$trimad --maxGOF=$maxG \
+	    --minReads=$minR --minFlank=$minF \
+	    --sbThreshold=$sbThresh --scThreshold=$scThresh --hapScoreThreshold=15 \
+	    --filterDuplicates=$filtdup \
+	    --filterVarsByCoverage=$filtvarcov --filteredReadsFrac=$filtrfrac --minVarFreq=$minvfreq \
+	    --mergeClusteredVariants=$mergeCvar --filterReadsWithUnmappedMates=$filtnomatch \
+	    --refFile="$REF" \
+	    --logFileName=plat.log \
+	    --output="$OUT".vcf======
+
+
+#============================
+#SABRE default parameters
+#============================
