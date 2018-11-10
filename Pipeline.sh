@@ -10,7 +10,7 @@ echo =====================================
 #Packages to import
 echo =====================================
 
-#Load modules that we are going to use in this pipeline
+#Load modules that we are going to use in this pipeline TESTESTESTEST
 
 module load fastqc
 
