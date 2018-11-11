@@ -26,51 +26,59 @@ echo ===================================
 #making a directory to be our new working directory for this session
 echo ===================================
 
-#make directory "variant calling"
-mkdir -v 'variant calling'
+#make parent directory variant_calling
+echo "$USER_NAME I am making a working directory for this pipeline"
 
-#move to 'variant calling'
-cd 'variant calling'
+mkdir -pv variant_calling
+
+#move to variant_calling, this will be our main WD for this pipeline
+echo "$USER_NAME moving you to variant_calling directory"
+
+cd variant_calling
 
 #make directories for our ref genome and fastq file(s)
-mkdir -v 'ref genome'
-mkdir -v 'fastq files'
-mkdir -v 'trimmed reads'
+echo "$USER_NAME making some directories for your data"
+
+mkdir -pv raw/ref_genome
+mkdir -pv raw/fastq_files
 
 echo ==================================
 #Download ref genome and fastq files
 echo ==================================
 
 #Download ref genome (I'm assumiung this is user choice, if not can just change to something that is automaticly called up)
-echo "Please upload path to a reference genome"
-read reference_genome
-  REF=$reference_genome
+echo "$USER_NAME require a reference genome, you can either provide the path to one or the url"
 
-#Move to appropriate directory
-mv REF /'ref genome'/
+read -p "are you uploading a path or a URL [p/u]" choice
+case "$choice" in
+  p|P )
+    echo "upload path to reference genome"
+    read reference_genome
+    REF=$reference_genome
+    mv REF raw/ref_genome
+    ;;
+  u|U )
+    echo "upload URL for reference genome"
+    read URL
+    REF=$URL
+    wget --progress=bar $REF
+    mv REF raw/ref_genome
+    ;;
+  * )
+    echo "invalid"
+    echo "only accepts single letter inputs"
+esac
 
-echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-#Alternative to above could download from ncbi
-#Ask for URL
-echo 'upload URL for reference genome'
-
-read referecne_genome
-  REFERENCE_URL=$referecne_genome
-
-#Download
-echo "Starting reference genome download"
-curl -s0 $REFERENCE_URL
-echo "Download Complete"
-
-echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+echo
 
 #Now need the user to load a fastq file for us
-echo 'Enter the path to a fastq file'
+echo '$USER_NAME enter the path to a fastq file'
 read fastq_file
   FASTQ_RAW=fastq_file
 
 #Move to appropriate directory
-mv $FASTQ_RAW 'fastq files'/
+mv $FASTQ_RAW raw/fastq_files/
+
 
 echo =================================
 #Use FastQC program to analyze the quality of the reads
