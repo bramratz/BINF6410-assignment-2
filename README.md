@@ -40,7 +40,7 @@ or if youre using a Debian Linux distributon - excute the following:
 * [BCFtools](https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2)
 * bwa (is downloaded alongside SamTools)
 
-  Example installation:
+**4. Example installation of a tool**
 
 ```
 ./configure --prefix=path/to/installation/destination/
