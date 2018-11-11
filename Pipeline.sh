@@ -115,7 +115,21 @@ echo =================================
 #use Sabre for demultiplexing
 echo =================================
 
+#ask the user for the path to sabre
+echo "$USER_NAME enter the path to sabre in your computer"
+read sabre
+  TOOL_SABRE=$sabre
 
+#ask the user to upload barcode path to barcode file
+echo "$USER_NAME enter the path to your barcode files"
+read barcodes
+  BARCODES=$barcodes
+
+#make directory for the results
+mkdir -pv raw/fastq_sabre
+
+#run sabre
+$TOOL_SABRE se -f raw/fastq_files/*.fastq -b $BARCODES -u raw/fastq_sabre/
 
 echo ==================================
 #Use sickle program to trim fastq files
@@ -129,14 +143,14 @@ read sickle
 mkdir -pv raw/fastq_trimmed
 
 #Run the sickle program with the fastq data
-for FASTQ in [raw/fastq_files/*.fastq]
+for FASTQ in [raw/fastq_sabre/*.fastq]
   do
     NAME=$(basename $FASTQ .fastq) #extracts the name of the file without the path and the .fastq extention and assigns it to the variable name
     echo "working with $NAME"
 
     #create some variables to make this less confusing
 
-    FASTQ=raw/fastq_files/$NAME\.fastq
+    FASTQ=raw/fastq_sabre/$NAME\.fastq
     TRIMMED=raw/fastq_trimmed/$NAME\.fq
 
     #data is all staged now lets run sickle
