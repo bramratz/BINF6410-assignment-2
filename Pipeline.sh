@@ -84,7 +84,12 @@ echo =================================
 #Use FastQC program to analyze the quality of the reads
 echo =================================
 
-#First have to ask the user to find the FastQC program in their computer and provide the path
+
+
+echo =================================
+#use Sabre for demultiplexing
+echo =================================
+
 echo 'Enter the path to FastQC in your computer'
 read FastQC
   TOOL_FASTQC=$FastQC
@@ -98,18 +103,18 @@ echo 'Done'
 
 #FastQC creates a .html file that can be viewed in a web browser this section gives the option to view the .html file or continue
 #**I'm not sure if this stops the pipeline if you pick yes tbh**
-
 read -p "Would you like to view the FastQC summary? If [y] will open another window, if [n] will continue [y/n]" choice
   case "$choice" in
-    y|Y ) xdg-open 'fastq files'/*.html;;
-    n|N ) exit;;
-    * ) echo "invalid, only single characters are accepted as a response"
+    y|Y )
+      xdg-open raw/fastq_files/*.html
+      ;;
+    n|N )
+      cd variant_calling
+      ;;
+    * )
+      echo "invalid"
+      echo "only accepts single letter inputs"
   esac
-
-echo =================================
-#use Sabre for demultiplexing
-echo =================================
-
 
 echo ==================================
 #Use sickle program to trim fastq files
