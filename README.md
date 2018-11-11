@@ -33,14 +33,31 @@ or if youre using a Debian Linux distributon - excute the following:
 
 **3. The following tools are used in the pipeline:**
 
+* [sickle](https://github.com/najoshi/sickle/archive/v1.33.tar.gz)
+* [sabre](https://github.com/najoshi/sabre/archive/master.zip)
 * [SamTools](https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2)
 * [HTSlib](https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2)
 * [BCFtools](https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2)
-* bwa
-* [sickle](https://github.com/najoshi/sickle/archive/v1.33.tar.gz)
-* [sabre](https://github.com/najoshi/sabre/archive/master.zip)
-* [CutAdapt](https://github.com/marcelm/cutadapt/archive/v1.18.tar.gz)
+* bwa (is downloaded alongside SamTools)
 
   Example installation:
-  
-  ```poop```
+
+```
+./configure --prefix=path/to/installation/destination/
+
+make
+
+make install
+```
+
+To use the tools globally without having to specify the path each time - add the path of the tool to the PATH environment variable.
+
+Accessing and editing the PATH variable through .bashrc:
+
+```
+cd
+
+nano bash.rc
+
+export PATH=path/to/tool/installation/directory/:$PATH
+```
