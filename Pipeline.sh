@@ -84,12 +84,6 @@ echo =================================
 #Use FastQC program to analyze the quality of the reads
 echo =================================
 
-
-
-echo =================================
-#use Sabre for demultiplexing
-echo =================================
-
 echo 'Enter the path to FastQC in your computer'
 read FastQC
   TOOL_FASTQC=$FastQC
@@ -115,6 +109,13 @@ read -p "Would you like to view the FastQC summary? If [y] will open another win
       echo "invalid"
       echo "only accepts single letter inputs"
   esac
+
+
+echo =================================
+#use Sabre for demultiplexing
+echo =================================
+
+
 
 echo ==================================
 #Use sickle program to trim fastq files
