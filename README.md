@@ -9,7 +9,7 @@
 * .SAM
 * .VCF
 
-## Installation
+## Requirements
 
 **1. Your system should have a version of python 3 installed**
 
@@ -31,12 +31,16 @@ or if youre using a Debian Linux distributon - excute the following:
 
 `sudo apt-get install libncursesw5-dev`
 
-**3. The following tools are required:**
+**3. The following tools are used in the pipeline:**
 
 * [SamTools](https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2)
 * [HTSlib](https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2)
 * [BCFtools](https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2)
 * bwa
-* sickle
-* sabre
-* CutAdapt
+* [sickle](https://github.com/najoshi/sickle/archive/v1.33.tar.gz)
+* [sabre](https://github.com/najoshi/sabre/archive/master.zip)
+* [CutAdapt](https://github.com/marcelm/cutadapt/archive/v1.18.tar.gz)
+
+  Example installation:
+  
+  ```poop```
