@@ -149,18 +149,20 @@ echo ================================
 #Align reads to reference genome BWA
 echo ================================
 
-#so to start we have to be in the main directory 'variant calling'
+#To start we have to be in the main directory variant_calling
+cd variant_calling
+
 #need to load paths for BWA and samtools
-echo 'Enter the path to BWA on your computer'
+echo "$USER_NAME enter the path to BWA on your computer"
 read bwa
   TOOL_BWA=$bwa
 
-echo 'Enter the path to samtools on your computer'
+echo "$USER_NAME enter the path to samtools on your computer"
 read samtools
   TOOL_SAMTOOLS=$samtools
 
 #remember that we assigned our reference genome to the variable $REF, but want to have a variable that includes the path to this to make it easier
-WORKING_REF='ref genome'/$REF
+WORKING_REF=raw/ref_genome/$REF
 
 #now need to index our reference genome for bwa and samtools
 $TOOL_BWA index $WORKING_REF
@@ -171,23 +173,28 @@ $TOOL_SAMTOOLS index $WORKING_REF
 mkdir -pv results/sai
 mkdir -pv results/sam
 mkdir -pv results/bam
+mkdir -pv results/bcf
+mkdir -pv results/vcf
 
 #now going to create a for loop to run the variant calling workflow on however many fastq files we have
 #remember the files we are using are in the 'trimmed reads' directory and are called FASTQ_TRIMMED.fq
 #this should be able to handle as many files as possible
 
-for reads in 'trimmed reads'/*.fq
+for reads in raw/fastq_trimmed/*.fq
   do
     NAME=$(basename $reads .fq) #extracts the name of the file without the path and the .fq extention and assigns it to the variable name
     echo "working with $NAME"
 
       echo "assign file names to variables to make this less comfusing"
 
-      FQ='trimmed reads'/$NAME\.fastq
+      FQ=raw/fastq_trimmed/$NAME\.fastq
       SAI=results/sai/$NAME\_aligned.sai
       SAM=results/sam/$NAME\_aligned.sam
       BAM=results/bam/$NAME\_aligned.bam
       SORTED_BAM=results/bam/$NAME\_aligned_sorted.bam
+      COUNT_BCF=results/bcf/$NAME\_raw.bcf
+      VARIANTS=results/bcf/$NAME\_variants.bcf
+      FINAL_VARIANTS=results/vcf/$NAME\_final_variants.vcf
 
       #data can now be moved easily with variables
       #align the reads with BWA
@@ -200,7 +207,7 @@ for reads in 'trimmed reads'/*.fq
 
       #SAM to BAM
 
-      $TOOL_SAMTOOLS view -S -b $SAM > $BAM
+      $TOOL_SAMTOOLS view -S -b -h $SAM > $BAM
 
       #sort the BAM file - not sure if this is necessary but everything online seems to do it
       #the -f simply ignores upper and lower case for sorting
@@ -210,6 +217,11 @@ for reads in 'trimmed reads'/*.fq
       #they also index them everywhere online and the command is simple enough so lets do that
 
       $TOOL_SAMTOOLS index $SORTED_BAM
+
+      #this line counts read coverage using samtools - prof does something similar to this
+      #can omit this if we want, b/c the next step is to do SNP calling with bcftools which is part of samtools
+
+      $TOOL_SAMTOOLS mpileup -g -f $WORKING_REF $SORTED_BAM > $RAW_BCF
 
 done
 
