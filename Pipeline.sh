@@ -122,37 +122,28 @@ echo ==================================
 echo ==================================
 
 #First have to ask the user to find the sickle program on their computer and provide the path
-echo 'Enter the path to sickle in your computer'
+echo "$USER_NAME enter the path to sickle in your computer"
 read sickle
   TOOL_SICKLE=$sickle
+#make a directory to store the trimmed reads from sickle
+mkdir -pv raw/fastq_trimmed
 
 #Run the sickle program with the fastq data
-echo 'Running sickle'
-
-for files in ['fastq files'/*.fastq]
+for FASTQ in [raw/fastq_files/*.fastq]
   do
-    $TOOL_SICKLE se -f $files -t illumina -o FASTQ_TRIMMED.fastq
-    echo 'done'
+    NAME=$(basename $FASTQ .fastq) #extracts the name of the file without the path and the .fastq extention and assigns it to the variable name
+    echo "working with $NAME"
 
-    if 'done'
+    #create some variables to make this less confusing
 
-    then
-      exit 0
+    FASTQ=raw/fastq_files/$NAME\.fastq
+    TRIMMED=raw/fastq_trimmed/$NAME\.fq
 
-    fi
+    #data is all staged now lets run sickle
+
+    $TOOL_SICKLE se -f $FASTQ -t illumina -o $TRIMMED
 
 done
-
-#**above is alittle complicated, the idea is that if theres more than one file then it should apply the sickle program to all of them before finishing the loop**
-#**this is simpler and just takes some of the file and applies sickle to it**
-
-echo 'Running sickle'
-
-$TOOL_SICKLE se -f 'fastq files'/FASTQ_RAW -t illumina -o FASTQ_TRIMMED.fastq
-
-echo "Done"
-#move the trimmed reads to a different directory
-mv FASTA_TRIMMED 'trimmed reads'/
 
 echo ================================
 #Align reads to reference genome BWA
