@@ -193,9 +193,7 @@ for reads in raw/fastq_trimmed/*.fq
       BAM=results/bam/$NAME\_aligned.bam
       SORTED_BAM=results/bam/$NAME\_aligned_sorted.bam
       COUNT_BCF=results/bcf/$NAME\_raw.bcf
-      VARIANTS=results/bcf/$NAME\_variants.bcf
-      FINAL_VARIANTS=results/vcf/$NAME\_final_variants.vcf
-
+      
       #data can now be moved easily with variables
       #align the reads with BWA
 
