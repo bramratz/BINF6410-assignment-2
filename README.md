@@ -57,7 +57,7 @@ Accessing and editing the PATH variable through .bashrc:
 ```
 cd
 
-nano bash.rc
+nano .bashrc
 
 export PATH=path/to/tool/installation/directory/:$PATH
 ```
