@@ -1,5 +1,43 @@
 #!/bin/bash
 
+echo "NEW STUFF"
+
+#using getopt
+#first creating a usage function that will outline what arguments to enter if nothing is entered
+usage () {
+  echo "Usage: $0 [-b <barcode fil>] [-f <fastq file>] [-r <reference genome>]" 1>&2; exit 1;
+}
+
+#these are positional parameters, the user has to get the right format to continue, if they don't an error message will be spit out that shows the correct formate and the pipeline will exit 
+while getopts ":b:f:r:" o; do
+  case "${o}" in
+    b )
+      b=${OPTARG}
+      ;;
+    f )
+      f=${OPTARG}
+      ;;
+    r )
+      r=${OPTARG}
+      ;;
+    * )
+      usage
+      ;;
+  esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${b}" ] || [ -z "${f}" ] || [ -z "${r}" ]; then
+  usage
+fi
+
+echo "b = ${b}"
+echo "f = ${f}"
+echo "r = ${r}"
+
+echo "END OF NEW STUFF"
+echo "MORE BELOW"
+
 #Who is using this pipeline
 echo Hello, who am I talking to?
 read USER_NAME
@@ -46,6 +84,9 @@ echo ==================================
 #Download ref genome and fastq files
 echo ==================================
 
+#** so with the positional parameters don't really need this section since we should have all the data downloaded **
+#** if runnung this for yourself take out or use # to silence this section whole section **
+
 #Download ref genome (I'm assumiung this is user choice, if not can just change to something that is automaticly called up)
 echo "$USER_NAME require a reference genome, you can either provide the path to one or the url"
 
@@ -83,6 +124,68 @@ mv $FASTQ_RAW raw/fastq_files/
 echo =================================
 #Use FastQC program to analyze the quality of the reads
 echo =================================
+
+echo "NEW STUFF"
+
+#make a simple press_enter function
+press_enter () {
+  echo -en "\nPress Enter to continue"
+}
+
+#asking the user if they would like to preform a FastQC analysis on their data
+#so what this thing does is print out a menue with options, if the user clicks 1 then FastQC will be preformed
+#and they will be prompted with another question asking them if they'd like to see the results of the test
+#if yes the program open up another window with the results if no brings them back to the working directory.
+#if at the beginning of all this they choose 0, then they get to skip preforming a fastqc
+selection=
+until [ "$selection" = "0" ]; do
+  echo "
+  PROGRAM MENU
+  1 - Preform FastQC
+
+  0 - return to current working directory
+  "
+
+  echo -n "Enter selection: "
+  read selection
+  echo ""
+  case $selection in
+    1 )
+      echo "Enter path to FastQC on your computer: "
+      read -r FastQC
+      echo ""
+      TOOL_FASTQC=$FastQC
+      echo "Running FastQC"
+      $TOOL_FASTQC ${f} #raw/fastq_files/$FASTQ_RAW
+      echo -en "Done \nWould you like to view the summary? (open another window)"
+      read -p "[y/n]: " choice
+      case "$choice" in
+        y|Y )
+          xdg-open *.html #raw/fastq_files/*.html
+          press_enter
+          ;;
+        n|N )
+          echo "$USER_NAME you are returning to variant_calling directory"
+          cd variant_calling
+          press_enter
+          ;;
+        * )
+          echo "please enter y or n"
+          press_enter
+      esac
+      ;;
+    0 )
+      echo "$USER_NAME you are returning to variant_calling directory"
+      cd variant_calling
+      press_enter
+      ;;
+    * )
+    echo "Please enter 1 or 0"
+    press_enter
+  esac
+done
+
+echo "END OF NEW STUFF"
 
 echo 'Enter the path to FastQC in your computer'
 read FastQC
