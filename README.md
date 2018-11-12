@@ -61,3 +61,28 @@ nano .bashrc
 
 export PATH=path/to/tool/installation/directory/:$PATH
 ```
+
+## Usage
+
+**1. User files and input**
+
+On start up the program will ask the user for input information and create a working directory as well as required subdirectories.
+###### note to self: change this if the url download works
+Once notified of folder creation, download your reference genome and place it in /raw/ref_genome folder. Follow the same instructions for the fastq data you wish to use. The user should also have a barcode file that is required for sabre.
+
+**2. FastQC**
+
+A FastQC menu will prompt you to perform the test, see the report, skip this step entirely. If you choose to generate a FastQC report - it will be viewable as an HTML file.
+
+**3. Demultiplexing**
+
+Sabre will demultiplex the NGS data. This requires a dna barcode file and the path to the file.
+
+**4. Read trimming**
+
+Sickle will trim the reads and cut apdapter sequences from the NGS sequencing. The program will prompt the user for the path to Sickle.
+
+**5. Alignment**
+
+
+
