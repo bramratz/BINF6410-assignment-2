@@ -54,23 +54,6 @@ echo "b = ${b}"
 echo "f = ${f}"
 echo "r = ${r}"
 
-echo =====================================
-#Packages to import
-echo =====================================
-
-#load modules that we are going to use in this pipeline (used the ones in the profs script becasue couldn't fins the versions in mine, will have to change them if needed)
-#so at the moment each time i need a package I'm simply asking the user to give me the path to each one. But if we can figure out how to add this part then we could remove then we wouldnt have to ask for individual packages could simply call up each program as we need it
-
-modules load bwa/0.7.13
-modules load samtools/1.3
-modules load vcftools/0.1.12b
-modules load platypus/0.8.1
-modules load python/3.5
-modules load sabre/1.000
-modules load cutadapt
-modules load FastQC/0.11.5
-modules load sickle/1.33-2
-
 echo ===================================
 #making a directory to be our new working directory for this session
 echo ===================================
