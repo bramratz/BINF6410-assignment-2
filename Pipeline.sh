@@ -1,24 +1,43 @@
 #!/bin/bash
 
-echo "NEW STUFF"
+#Who is using this pipeline
+echo Hello, who am I talking to?
+read USER_NAME
+echo "Hello $USER_NAME – It’s nice to meet you!"
 
-#using getopt
 #first creating a usage function that will outline what arguments to enter if nothing is entered
+#this serves as an error mesage and exits the program so to proceed have to have the correct data entered
 usage () {
   echo "Usage: $0 [-b <barcode fil>] [-f <fastq file>] [-r <reference genome>]" 1>&2; exit 1;
 }
 
-#these are positional parameters, the user has to get the right format to continue, if they don't an error message will be spit out that shows the correct formate and the pipeline will exit 
+#this uses getopt to provide the user with arguments to input data to the pipeline
+#if at any step data is not entered into an argument, an error message will be show and will exit the pipe
 while getopts ":b:f:r:" o; do
   case "${o}" in
     b )
       b=${OPTARG}
+      if [[ -z "${b}" ]]
+        then
+          echo -en "the barcode file does not exist"
+          usage
+      fi
       ;;
     f )
       f=${OPTARG}
+      if [[ -z "${f}" ]]
+        then
+          echo -en "the fastq file does not exist"
+          usage
+      fi
       ;;
     r )
       r=${OPTARG}
+      if [[ -z "${r}" ]]
+        then
+          echo -en "the reference genome file does not exist"
+          usage
+      fi
       ;;
     * )
       usage
@@ -34,14 +53,6 @@ fi
 echo "b = ${b}"
 echo "f = ${f}"
 echo "r = ${r}"
-
-echo "END OF NEW STUFF"
-echo "MORE BELOW"
-
-#Who is using this pipeline
-echo Hello, who am I talking to?
-read USER_NAME
-echo "Hello $USER_NAME – It’s nice to meet you! Please load the modules below."
 
 echo =====================================
 #Packages to import
@@ -69,63 +80,38 @@ echo "$USER_NAME I am making a working directory for this pipeline"
 
 mkdir -pv variant_calling
 
+#now copy
+cp $BARCODES variant_calling
+cp $RAW_FASTQ variant_calling
+cp $REF variant_calling
+
+#export these variables
+export $BARCODES
+export $RAW_FASTQ
+export $REF
+
 #move to variant_calling, this will be our main WD for this pipeline
 echo "$USER_NAME moving you to variant_calling directory"
 
 cd variant_calling
+
+#print working directory
+pwd
 
 #make directories for our ref genome and fastq file(s)
 echo "$USER_NAME making some directories for your data"
 
 mkdir -pv raw/ref_genome
 mkdir -pv raw/fastq_files
+mkdir -pv raw/barcodes
 
-echo ==================================
-#Download ref genome and fastq files
-echo ==================================
-
-#** so with the positional parameters don't really need this section since we should have all the data downloaded **
-#** if runnung this for yourself take out or use # to silence this section whole section **
-
-#Download ref genome (I'm assumiung this is user choice, if not can just change to something that is automaticly called up)
-echo "$USER_NAME require a reference genome, you can either provide the path to one or the url"
-
-read -p "are you uploading a path or a URL [p/u]" choice
-case "$choice" in
-  p|P )
-    echo "upload path to reference genome"
-    read reference_genome
-    REF=$reference_genome
-    mv REF raw/ref_genome
-    ;;
-  u|U )
-    echo "upload URL for reference genome"
-    read URL
-    REF=$URL
-    wget --progress=bar $REF
-    mv REF raw/ref_genome
-    ;;
-  * )
-    echo "invalid"
-    echo "only accepts single letter inputs"
-esac
-
-echo
-
-#Now need the user to load a fastq file for us
-echo '$USER_NAME enter the path to a fastq file'
-read fastq_file
-  FASTQ_RAW=fastq_file
-
-#Move to appropriate directory
-mv $FASTQ_RAW raw/fastq_files/
-
+mv $BARCODES raw/barcodes
+mv $RAW_FASTQ raw/fastq_files
+mv $REF raw/ref_genome
 
 echo =================================
 #Use FastQC program to analyze the quality of the reads
 echo =================================
-
-echo "NEW STUFF"
 
 #make a simple press_enter function
 press_enter () {
@@ -185,82 +171,65 @@ until [ "$selection" = "0" ]; do
   esac
 done
 
-echo "END OF NEW STUFF"
-
-echo 'Enter the path to FastQC in your computer'
-read FastQC
-  TOOL_FASTQC=$FastQC
-
-#Run the FastQC program with the fastq data
-echo 'running FastQC'
-
-$TOOL_FASTQC 'fastq files'/$FASTQ_RAW
-
-echo 'Done'
-
-#FastQC creates a .html file that can be viewed in a web browser this section gives the option to view the .html file or continue
-#**I'm not sure if this stops the pipeline if you pick yes tbh**
-read -p "Would you like to view the FastQC summary? If [y] will open another window, if [n] will continue [y/n]" choice
-  case "$choice" in
-    y|Y )
-      xdg-open raw/fastq_files/*.html
-      ;;
-    n|N )
-      cd variant_calling
-      ;;
-    * )
-      echo "invalid"
-      echo "only accepts single letter inputs"
-  esac
-
-
 echo =================================
 #use Sabre for demultiplexing
 echo =================================
 
 #ask the user for the path to sabre
-echo "$USER_NAME enter the path to sabre in your computer"
+echo "$USER_NAME please enter the command for sabre, going to make it into a variable: "
 read sabre
   TOOL_SABRE=$sabre
-
-#ask the user to upload barcode path to barcode file
-echo "$USER_NAME enter the path to your barcode files"
-read barcodes
-  BARCODES=$barcodes
 
 #make directory for the results
 mkdir -pv raw/fastq_sabre
 
 #run sabre
-$TOOL_SABRE se -f raw/fastq_files/*.fastq -b $BARCODES -u raw/fastq_sabre/
+echo "running sabre"
+
+#make some variables
+input_fastq=raw/fastq_files/*.fastq
+input_barcode=raw/barcodes/*.txt
+output_sabre=raw/fastq_sabre/SABRE_DATA.sabre_fq
+
+#run sabre
+$TOOL_SABRE se -f $input_fastq -b $input_barcode -u $output_sabre
+#$TOOL_SABRE se -f raw/fastq_files/*.fastq -b raw/barcodes/*.txt -u SABRE_DATA.fastq
+
+echo "sabre complete"
 
 echo ==================================
 #Use sickle program to trim fastq files
 echo ==================================
 
+
 #First have to ask the user to find the sickle program on their computer and provide the path
-echo "$USER_NAME enter the path to sickle in your computer"
+echo "$USER_NAME please enter the command for sickle, making it into a variable: "
 read sickle
   TOOL_SICKLE=$sickle
+
 #make a directory to store the trimmed reads from sickle
 mkdir -pv raw/fastq_trimmed
 
 #Run the sickle program with the fastq data
-for FASTQ in [raw/fastq_sabre/*.fastq]
+echo "running sickle"
+
+for FASTQ in "raw/fastq_sabre/*.sabre_fq"
   do
-    NAME=$(basename $FASTQ .fastq) #extracts the name of the file without the path and the .fastq extention and assigns it to the variable name
+    NAME=$( basename $FASTQ .sabre_fq ) #extracts the name of the file without the path and the .fastq extention and assigns it to the variable name
     echo "working with $NAME"
 
     #create some variables to make this less confusing
 
-    FASTQ=raw/fastq_sabre/$NAME\.fastq
-    TRIMMED=raw/fastq_trimmed/$NAME\.fq
+    FASTQ=raw/fastq_sabre/$NAME\.sabre_fq
+    TRIMMED=raw/fastq_trimmed/$NAME\.trimmed_fq
 
     #data is all staged now lets run sickle
 
     $TOOL_SICKLE se -f $FASTQ -t illumina -o $TRIMMED
 
 done
+
+echo "sickle complete"
 
 echo ================================
 #Align reads to reference genome BWA
@@ -270,11 +239,11 @@ echo ================================
 cd variant_calling
 
 #need to load paths for BWA and samtools
-echo "$USER_NAME enter the path to BWA on your computer"
+echo "$USER_NAME enter the path to BWA on your computer, making it into a variable: "
 read bwa
   TOOL_BWA=$bwa
 
-echo "$USER_NAME enter the path to samtools on your computer"
+echo "$USER_NAME enter the path to samtools on your computer, making it into a variable: "
 read samtools
   TOOL_SAMTOOLS=$samtools
 
@@ -284,7 +253,7 @@ WORKING_REF=raw/ref_genome/$REF
 #now need to index our reference genome for bwa and samtools
 $TOOL_BWA index $WORKING_REF
 
-$TOOL_SAMTOOLS index $WORKING_REF
+$TOOL_SAMTOOLS faidx $WORKING_REF
 
 #now lets create some output paths for intermediate and final result files
 mkdir -pv results/sai
@@ -297,14 +266,14 @@ mkdir -pv results/vcf
 #remember the files we are using are in the 'trimmed reads' directory and are called FASTQ_TRIMMED.fq
 #this should be able to handle as many files as possible
 
-for reads in raw/fastq_trimmed/*.fq
+for reads in raw/fastq_trimmed/*.trimmed_fq
   do
-    NAME=$(basename $reads .fq) #extracts the name of the file without the path and the .fq extention and assigns it to the variable name
+    NAME=$(basename $reads .trimmed_fq) #extracts the name of the file without the path and the .fq extention and assigns it to the variable name
     echo "working with $NAME"
 
       echo "assign file names to variables to make this less comfusing"
 
-      FQ=raw/fastq_trimmed/$NAME\.fastq
+      FQ=raw/fastq_trimmed/$NAME\.trimmed_fq
       SAI=results/sai/$NAME\_aligned.sai
       SAM=results/sam/$NAME\_aligned.sam
       BAM=results/bam/$NAME\_aligned.bam
@@ -327,7 +296,7 @@ for reads in raw/fastq_trimmed/*.fq
       #sort the BAM file - not sure if this is necessary but everything online seems to do it
       #the -f simply ignores upper and lower case for sorting
 
-      $TOOL_SAMTOOLS sort -f $BAM $SORTED_BAM
+      $TOOL_SAMTOOLS sort $BAM $SORTED_BAM
 
       #they also index them everywhere online and the command is simple enough so lets do that
 
@@ -336,49 +305,12 @@ for reads in raw/fastq_trimmed/*.fq
       #this line counts read coverage using samtools - prof does something similar to this
       #can omit this if we want, b/c the next step is to do SNP calling with bcftools which is part of samtools
 
-      $TOOL_SAMTOOLS mpileup -g -f $WORKING_REF $SORTED_BAM > $RAW_BCF
+      $TOOL_SAMTOOLS mpileup -uf $WORKING_REF $SORTED_BAM > $RAW_BCF
 
 done
 
-#====================
-#Scripts for programs -- Default parameters to be changed?
-#====================
-
-#===================
-#PLATYPUS Script
-#===================
-DATA=/home/dator/NGS/bamlist
-REF=/home/dator/refgenome/Gmax_275_v2.0.fa
-PLAT=/home/dator/programs/Platypus_0.8.1/Platypus.py
-OUT=variantcalling
-CPU=4
-
-mkdir results
-cd results
-
-exec &> platypus.log
-
-python $PLAT callVariants --bamFiles="$DATA" \
-	    --nCPU="$CPU" --minMapQual=20 --minBaseQual=10 \
-	    --minGoodQualBases=5 --badReadsThreshold=10 \
-	    --rmsmqThreshold=20 --abThreshold=0.01 --maxReadLength=250  --hapScoreThreshold=20 \
-	    --trimAdapter=0 --maxGOF=20 \
-	    --minReads=50 --minFlank=5 \
-	    --sbThreshold=0.01 --scThreshold=0.95 --hapScoreThreshold=15 \
-	    --filterDuplicates=0 \
-	    --filterVarsByCoverage=0 --filteredReadsFrac=0.7 --minVarFreq=0.002 \
-	    --mergeClusteredVariants=0 --filterReadsWithUnmappedMates=0 \
-	    --refFile="$REF" \
-	    --logFileName=plat.log \
-	    --output="$OUT".vcf
-		if [ $? -ne 0 ]
-			then
-				printf "There is a problem at the platypus step"
-				exit 1
-		fi
-#======================
-#End of PLATYPUS Script
-#================#
+#need to remove this before sibmission, it exits the scripts rn because platypusisnt done
+exit
 
 #============================
 #Platypus default parameters
