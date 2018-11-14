@@ -3,7 +3,7 @@
 #first creating a usage function that will outline what arguments to enter if nothing is entered
 #this serves as an error mesage and exits the program so to proceed have to have the correct data entered
 usage () {
-  echo "Usage: $0 [-b <barcode fil>] [-f <fastq file>] [-r <reference genome>]" 1>&2; exit 1;
+  echo "Usage: $0 [-b <barcode file.txt>] [-f <fastq file.fastq>] [-r <reference genome>]" 1>&2; exit 1;
 }
 
 #This uses getopts and a while loop to allow the user to put data in as arguments
