@@ -38,21 +38,30 @@ or if youre using a Debian Linux distributon - excute the following:
 * [SamTools](https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2)
 * [HTSlib](https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2)
 * [BCFtools](https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2)
-* bwa (is downloaded alongside SamTools)
+* [bwa](https://sourceforge.net/projects/bio-bwa/files/latest/download)
 
 **4. Example installation of a tool**
 
-```
-./configure --prefix=path/to/installation/destination/
+Untar Samtools, HTSlib, and BCFtools using the following command
 
-make
+`
+tar -vxjf htslib-1.9.tar.bz2
+`
+Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
 
-make install
-```
+`./configure --prefix=path/to/installation/destination/`
 
-To use the tools globally without having to specify the path each time - add the path of the tool to the PATH environment variable.
+Next we want to build the software using the steps outlined in the makefile included in the download by running:
 
-Accessing and editing the PATH variable through .bashrc:
+`make`
+
+Laslty to install the software we run the following command:
+
+`make install`
+
+* It is important to note that if an error concerning permissions is encountered, you may possibly need to use `sudo` at the beggning of the command. Some tools only need `./configure` or `make` to be installed. 
+
+To use the tools globally without having to specify the path each time - add the path of the tool to the PATH environment variable. Access and edit the PATH variable at the end of the .bashrc file by running the following commands:
 
 ```
 cd
@@ -61,6 +70,8 @@ nano .bashrc
 
 export PATH=path/to/tool/installation/directory/:$PATH
 ```
+
+* if you're using a mac the .bashrc file may not exist and you will have to [create a .bash_profile](https://medium.com/@alohaglenn/programming-lifehack-creating-a-bash-profile-56166dbd341c).
 
 ## Usage
 
