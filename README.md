@@ -42,20 +42,20 @@ or if youre using a Debian Linux distributon - excute the following:
 
 **4. Example installation of a tool**
 
-  **a.** Untar Samtools, HTSlib, and BCFtools using the following command:
+ * **A.** Untar Samtools, HTSlib, and BCFtools using the following command:
 
   `tar -vxjf htslib-1.9.tar.bz2`
 
 
-  **b.** Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
+ * **B.** Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
 
   `./configure --prefix=path/to/installation/destination/`
 
-  **c.** Next we want to build the software using the steps outlined in the makefile included in the download by running:
+ * **C.** Next we want to build the software using the steps outlined in the makefile included in the download by running:
 
   `make`
 
-  **d.** Laslty to install the software we run the following command:
+ * **D.** Laslty to install the software we run the following command:
 
   `make install`
 
