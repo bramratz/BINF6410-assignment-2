@@ -13,9 +13,9 @@
 
 ### 1. Your system should have a version of python 3 installed
 
-[Downloads on Python's homepage](https://www.python.org/downloads/)
+[Download from Python's homepage](https://www.python.org/downloads/)
 
-or if youre using a Debian Linux distributon - excute the following:
+or excute the following:
 
 `sudo apt-get install python3`
 
@@ -75,11 +75,9 @@ or if youre using a Debian Linux distributon - excute the following:
 
 ## Usage
 
-### 1. User files and input
+### 1. User file input
 
-On start up the program will ask the user for input information and create a working directory as well as required subdirectories.
-###### note to self: change this if the url download works
-Once notified of folder creation, download your reference genome and place it in /raw/ref_genome folder. Follow the same instructions for the fastq data you wish to use. The user should also have a barcode file that is required for sabre.
+On start up the program will ask the user for input information and create a working directory as well as required subdirectories. To use the program you must specify the path to barcode and fastq files with `.txt` and `.fastq` extensions, respectively. A reference genome must also be specified but there is no one type that is must be.
 
 ### 2. FastQC
 
@@ -87,11 +85,11 @@ A FastQC menu will prompt you to perform the test, see the report, skip this ste
 
 ### 3. Demultiplexing
 
-Sabre will demultiplex the NGS data. This requires a dna barcode file and the path to the file.
+The program will now ask the user to enter the command `sabre`. The program stores this information as a variable. Sabre will demultiplex the NGS data, this requires the dna barcode and fastq files. The output of this step will remain a fastq file.
 
 ### 4. Read trimming
 
-Sickle will trim the reads and cut apdapter sequences from the NGS sequencing. The program will prompt the user for the path to Sickle.
+This step of the program will ask the user to type the `sickle` command to later use as a variable as it did in the previous step. Sickle will trim the reads and cut apdapter sequences from the NGS sequencing data. At the moment only single end data is processed.
 
 ### 5. Alignment
 
