@@ -42,36 +42,36 @@ or if youre using a Debian Linux distributon - excute the following:
 
 **4. Example installation of a tool**
 
-Untar Samtools, HTSlib, and BCFtools using the following command
+  **a.** Untar Samtools, HTSlib, and BCFtools using the following command:
 
-`
-tar -vxjf htslib-1.9.tar.bz2
-`
-Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
+  `tar -vxjf htslib-1.9.tar.bz2`
 
-`./configure --prefix=path/to/installation/destination/`
 
-Next we want to build the software using the steps outlined in the makefile included in the download by running:
+  **b.** Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
 
-`make`
+  `./configure --prefix=path/to/installation/destination/`
 
-Laslty to install the software we run the following command:
+  **c.** Next we want to build the software using the steps outlined in the makefile included in the download by running:
 
-`make install`
+  `make`
 
-* It is important to note that if an error concerning permissions is encountered, you may possibly need to use `sudo` at the beggning of the command. Some tools only need `./configure` or `make` to be installed. 
+  **d.** Laslty to install the software we run the following command:
 
-To use the tools globally without having to specify the path each time - add the path of the tool to the PATH environment variable. Access and edit the PATH variable at the end of the .bashrc file by running the following commands:
+  `make install`
 
-```
-cd
+  * It is important to note that if an error concerning permissions is encountered, you may possibly need to use `sudo` at the beggning of     the command. Some tools only need `./configure` or `make` to be installed. 
 
-nano .bashrc
+  To use the tools globally without having to specify the path each time - add the path of the tool to the PATH environment variable. Access   and edit the PATH variable at the end of the .bashrc file by running the following commands:
 
-export PATH=path/to/tool/installation/directory/:$PATH
-```
+  ```
+  cd
 
-* if you're using a mac the .bashrc file may not exist and you will have to [create a .bash_profile](https://medium.com/@alohaglenn/programming-lifehack-creating-a-bash-profile-56166dbd341c).
+  nano .bashrc
+
+  export PATH=path/to/tool/installation/directory/:$PATH
+  ```
+
+  * if you're using a mac the .bashrc file may not exist and you will have to [create a .bash_profile](https://medium.com/@alohaglenn/programming-lifehack-creating-a-bash-profile-56166dbd341c).
 
 ## Usage
 
