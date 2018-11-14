@@ -11,7 +11,7 @@
 
 ## Requirements
 
-**1. Your system should have a version of python 3 installed**
+### 1. Your system should have a version of python 3 installed
 
 [Downloads on Python's homepage](https://www.python.org/downloads/)
 
@@ -19,7 +19,7 @@ or if youre using a Debian Linux distributon - excute the following:
 
 `sudo apt-get install python3`
 
-**2. Installation of these Debian packages is required as they are dependecies of some tools and function as pipeline optimizers.**
+### 2. Installation of these Debian packages is required as they are dependecies of some tools and function as pipeline optimizers.
 
 `sudo apt-get install libbz2-dev`
 
@@ -31,7 +31,7 @@ or if youre using a Debian Linux distributon - excute the following:
 
 `sudo apt-get install libncursesw5-dev`
 
-**3. The following tools are used in the pipeline:**
+### 3. The following tools are used in the pipeline:
 
 * [sickle](https://github.com/najoshi/sickle/archive/v1.33.tar.gz)
 * [sabre](https://github.com/najoshi/sabre/archive/master.zip)
@@ -40,28 +40,28 @@ or if youre using a Debian Linux distributon - excute the following:
 * [BCFtools](https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2)
 * [bwa](https://sourceforge.net/projects/bio-bwa/files/latest/download)
 
-**4. Example installation of a tool**
+### 4. Example installation of a tool
 
- * **A.** Untar Samtools, HTSlib, and BCFtools using the following command:
+- Untar Samtools, HTSlib, and BCFtools using the following command:
 
   `tar -vxjf htslib-1.9.tar.bz2`
 
 
- * **B.** Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
+- Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
 
   `./configure --prefix=path/to/installation/destination/`
 
- * **C.** Next we want to build the software using the steps outlined in the makefile included in the download by running:
+- Next we want to build the software using the steps outlined in the makefile included in the download by running:
 
   `make`
 
- * **D.** Laslty to install the software we run the following command:
+- Laslty to install the software we run the following command:
 
   `make install`
 
   * It is important to note that if an error concerning permissions is encountered, you may possibly need to use `sudo` at the beggning of     the command. Some tools only need `./configure` or `make` to be installed. 
 
-  To use the tools globally without having to specify the path each time - add the path of the tool to the PATH environment variable. Access   and edit the PATH variable at the end of the .bashrc file by running the following commands:
+- To use the tools globally without having to specify the path each time - add the path of the tool to the PATH environment variable. Access   and edit the PATH variable at the end of the .bashrc file by running the following commands:
 
   ```
   cd
@@ -75,7 +75,7 @@ or if youre using a Debian Linux distributon - excute the following:
 
 ## Usage
 
-**1. User files and input**
+### 1. User files and input
 
 On start up the program will ask the user for input information and create a working directory as well as required subdirectories.
 ###### note to self: change this if the url download works
