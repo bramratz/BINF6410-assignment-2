@@ -50,9 +50,15 @@ if [ -z "${b}" ] || [ -z "${f}" ] || [ -z "${r}" ]; then
   usage
 fi
 
+#echo what variable is assigned to what 
 echo "b = ${b}"
 echo "f = ${f}"
 echo "r = ${r}"
+
+#assign new variables 
+BARCODES=$b
+RAW_FASTQ=$f
+RAW=$r
 
 echo ===================================
 #making a directory to be our new working directory for this session
