@@ -1,18 +1,13 @@
 #!/bin/bash
 
-#Who is using this pipeline
-echo Hello, who am I talking to?
-read USER_NAME
-echo "Hello $USER_NAME – It’s nice to meet you!"
-
 #first creating a usage function that will outline what arguments to enter if nothing is entered
 #this serves as an error mesage and exits the program so to proceed have to have the correct data entered
 usage () {
   echo "Usage: $0 [-b <barcode fil>] [-f <fastq file>] [-r <reference genome>]" 1>&2; exit 1;
 }
 
-#this uses getopt to provide the user with arguments to input data to the pipeline
-#if at any step data is not entered into an argument, an error message will be show and will exit the pipe
+#This uses getopts and a while loop to allow the user to put data in as arguments
+#the way this is set up it will only allow you to continue if you add data to all three fields. Otherwise the usage function will echo an error and show the user the appropriate format to use 
 while getopts ":b:f:r:" o; do
   case "${o}" in
     b )
@@ -50,15 +45,19 @@ if [ -z "${b}" ] || [ -z "${f}" ] || [ -z "${r}" ]; then
   usage
 fi
 
-#echo what variable is assigned to what 
 echo "b = ${b}"
 echo "f = ${f}"
 echo "r = ${r}"
 
-#assign new variables 
+#assign to new variables
 BARCODES=$b
 RAW_FASTQ=$f
-RAW=$r
+REF=$r
+
+#Who is using this pipeline
+echo Hello, who am I talking to?
+read USER_NAME
+echo "Hello $USER_NAME – It’s nice to meet you!"
 
 echo ===================================
 #making a directory to be our new working directory for this session
@@ -108,10 +107,6 @@ press_enter () {
 }
 
 #asking the user if they would like to preform a FastQC analysis on their data
-#so what this thing does is print out a menue with options, if the user clicks 1 then FastQC will be preformed
-#and they will be prompted with another question asking them if they'd like to see the results of the test
-#if yes the program open up another window with the results if no brings them back to the working directory.
-#if at the beginning of all this they choose 0, then they get to skip preforming a fastqc
 selection=
 until [ "$selection" = "0" ]; do
   echo "
@@ -131,12 +126,12 @@ until [ "$selection" = "0" ]; do
       echo ""
       TOOL_FASTQC=$FastQC
       echo "Running FastQC"
-      $TOOL_FASTQC ${f} #raw/fastq_files/$FASTQ_RAW
+      $TOOL_FASTQC raw/fastq_files/$RAW_FASTQ
       echo -en "Done \nWould you like to view the summary? (open another window)"
       read -p "[y/n]: " choice
       case "$choice" in
         y|Y )
-          xdg-open *.html #raw/fastq_files/*.html
+          xdg-open raw/fastq_files/*.html
           press_enter
           ;;
         n|N )
@@ -186,10 +181,12 @@ $TOOL_SABRE se -f $input_fastq -b $input_barcode -u $output_sabre
 
 echo "sabre complete"
 
+#move file
+#mv SABRE_DATA.fastq raw/fastq_sabre
+
 echo ==================================
 #Use sickle program to trim fastq files
 echo ==================================
-
 
 #First have to ask the user to find the sickle program on their computer and provide the path
 echo "$USER_NAME please enter the command for sickle, making it into a variable: "
@@ -242,7 +239,7 @@ WORKING_REF=raw/ref_genome/$REF
 #now need to index our reference genome for bwa and samtools
 $TOOL_BWA index $WORKING_REF
 
-$TOOL_SAMTOOLS faidx $WORKING_REF
+$TOOL_SAMTOOLS index $WORKING_REF
 
 #now lets create some output paths for intermediate and final result files
 mkdir -pv results/sai
@@ -257,10 +254,10 @@ mkdir -pv results/vcf
 
 for reads in raw/fastq_trimmed/*.trimmed_fq
   do
-    NAME=$(basename $reads .trimmed_fq) #extracts the name of the file without the path and the .fq extention and assigns it to the variable name
+    NAME=$( basename $reads .trimmed_fq ) #extracts the name of the file without the path and the .fq extention and assigns it to the variable name
     echo "working with $NAME"
 
-      echo "assign file names to variables to make this less comfusing"
+      echo "assign file names to variables to make this less confusing"
 
       FQ=raw/fastq_trimmed/$NAME\.trimmed_fq
       SAI=results/sai/$NAME\_aligned.sai
@@ -268,8 +265,9 @@ for reads in raw/fastq_trimmed/*.trimmed_fq
       BAM=results/bam/$NAME\_aligned.bam
       SORTED_BAM=results/bam/$NAME\_aligned_sorted.bam
       COUNT_BCF=results/bcf/$NAME\_raw.bcf
-      FINAL_VCF=results/bcf/$NAME\.final_bcf
-      
+      FINAL_BCF=results/bcf/$NAME\.final_bcf
+      VAR_VCF=results/vcf/$NAME\.var.vcf
+
       #data can now be moved easily with variables
       #align the reads with BWA
 
@@ -292,20 +290,24 @@ for reads in raw/fastq_trimmed/*.trimmed_fq
 
       $TOOL_SAMTOOLS index $SORTED_BAM
 
-      #this line counts read coverage using samtools - prof does something similar to this
-      #can omit this if we want, b/c the next step is to do SNP calling with bcftools which is part of samtools
+      #reindex Ref genome
+      #make a new empty variable
+      REINDEX_REF=
+      samtools faidx $WORKING_REF
 
-      $TOOL_SAMTOOLS mpileup -uf $WORKING_REF $SORTED_BAM > $COUNT_BCF
-      
-      #use bcftools to get the SNP varient calls
-      bcftools call -mv $COUNT_BCF > $FINAL_VCF
-      
-      #view this variable 
-      less $FINAL_VCF
+      #use bcftools to run the mpileup command can get get the SNP varient calls
+      bcftools mpileup -Ou -f $WORKING_REF $SORTED_BAM | \
+      bcftools call -Ou -mv | \
+      bcftools filter -s LowQual -e '%QUAL<20 || DP>100' > $VAR_VCF
+        #if [ $? -ne 0 ]; then
+          #printf "There is a problem converting the bcf file to a vcf file"
+          #exit 1
+        #fi
 
+      #view the file
+      less $VAR_VCF
 done
 
-#need to remove this before sibmission, it exits the scripts rn because platypusisnt done
 exit
 
 #============================
