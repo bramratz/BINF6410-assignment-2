@@ -53,6 +53,7 @@ echo "r = ${r}"
 BARCODES=$b
 RAW_FASTQ=$f
 REF=$r
+
 #Who is using this pipeline
 echo Hello, who am I talking to?
 read USER_NAME
