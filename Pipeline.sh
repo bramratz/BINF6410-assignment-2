@@ -262,6 +262,7 @@ for reads in raw/fastq_trimmed/*.trimmed_fq
       BAM=results/bam/$NAME\_aligned.bam
       SORTED_BAM=results/bam/$NAME\_aligned_sorted.bam
       COUNT_BCF=results/bcf/$NAME\_raw.bcf
+      FINAL_VCF=results/bcf/$NAME\.final_bcf
       
       #data can now be moved easily with variables
       #align the reads with BWA
@@ -279,7 +280,7 @@ for reads in raw/fastq_trimmed/*.trimmed_fq
       #sort the BAM file - not sure if this is necessary but everything online seems to do it
       #the -f simply ignores upper and lower case for sorting
 
-      $TOOL_SAMTOOLS sort $BAM $SORTED_BAM
+      $TOOL_SAMTOOLS sort $BAM -o $SORTED_BAM
 
       #they also index them everywhere online and the command is simple enough so lets do that
 
@@ -288,7 +289,13 @@ for reads in raw/fastq_trimmed/*.trimmed_fq
       #this line counts read coverage using samtools - prof does something similar to this
       #can omit this if we want, b/c the next step is to do SNP calling with bcftools which is part of samtools
 
-      $TOOL_SAMTOOLS mpileup -uf $WORKING_REF $SORTED_BAM > $RAW_BCF
+      $TOOL_SAMTOOLS mpileup -uf $WORKING_REF $SORTED_BAM > $COUNT_BCF
+      
+      #use bcftools to get the SNP varient calls
+      bcftools call -mv $COUNT_BCF > $FINAL_VCF
+      
+      #view this variable 
+      less $FINAL_VCF
 
 done
 
