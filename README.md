@@ -5,6 +5,7 @@
 
 [name] is a pipeline designed to be used with fastq type files containing genomic information which returns a variant calling formart (VCF) file. However, the following intermediary file types may be used as well:
 
+* .FASTQ
 * .BAM
 * .SAM
 * .VCF
@@ -79,17 +80,27 @@ or excute the following:
 
 On start up the program will ask the user for input information and create a working directory as well as required subdirectories. To use the program you must specify the path to barcode and fastq files with `.txt` and `.fastq` extensions, respectively. A reference genome must also be specified but there is no one type that is must be.
 
+If you already have a `.bam` or `.sam` file then you may use that to obtain a variant calling (genetype table) file.
+
+Once a file is uploaded a menu will ask the user the type of input to confirm and begin analysis. 
+
 ### 2. FastQC
 
 A FastQC menu will prompt you to perform the test, see the report, skip this step entirely. If you choose to generate a FastQC report - it will be viewable as an HTML file.
+
+If you would like to find out more about how FastQC works and what the plot shows then visit the [project website] (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/). This [link](https://github.com/s-andrews/FastQC) is to the FastQC github page.
 
 ### 3. Demultiplexing
 
 The program will now ask the user to enter the command `sabre`. The program stores this information as a variable. Sabre will demultiplex the NGS data, this requires the dna barcode and fastq files. The output of this step will remain a fastq file.
 
+For more information about the program or other options that you may modify this program with, visit the [Sabre](https://github.com/najoshi/sabre) github page.
+
 ### 4. Read trimming
 
 This step of the program will ask the user to type the `sickle` command to later use as a variable as it did in the previous step. Sickle will trim the reads and cut apdapter sequences from the NGS sequencing data. At the moment only single end data is processed.
+
+For more information about how to integrate pair-end reading and other options, visit the [sickle](https://github.com/najoshi/sickle) github page.
 
 ### 5. Alignment
 
