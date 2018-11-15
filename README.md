@@ -1,13 +1,13 @@
 # FaQ2Var
 ## About
 
-FaQ2Var (fastq to variant calling) is a pipeline designed to be used with fastq type files containing genomic information which returns a variant calling formart (VCF) file. However, the following intermediary file types may be used as well:
+FaQ2Var (fastq to variant calling) is a pipeline designed to be used with fastq type files containing genomic information which returns a variant calling format (VCF) file. However, the following intermediary file types may be used as well:
 
 * .FASTQ
 * .BAM
 * .SAM
 
-The output of the pipeline is a .VCF file extension which contains a genotype information. At the moemnt the program allows users to jump into various points of the pipeline using processed files such as `.BAM` and `.SAM`.
+The output of the pipeline is a .VCF file extension which contains genotype information. Checkpoints are used in the program allowing users to jump into various points of the pipeline using processed files such as `.BAM` and `.SAM`.
 
 ## Requirements
 
@@ -44,9 +44,10 @@ or excute the following:
 
 - Untar Samtools, HTSlib, and BCFtools using the following command:
 
-  `tar -vxjf htslib-1.9.tar.bz2`
-
-
+  `tar -vxjf name-of-tool.tar.bz2`
+  
+  - The other programs may download as `.ZIP` or `.gz` which have different instructions for unpacking
+  
 - Then we run the following command which gets the specific system you are using ready for building the program by ensuring all dependencies are present:
 
   `./configure --prefix=path/to/installation/destination/`
