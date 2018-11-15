@@ -88,7 +88,8 @@ Once a file is uploaded a menu will ask the user the type of input to confirm an
 
 A FastQC menu will prompt you to perform the test, see the report, skip this step entirely. If you choose to generate a FastQC report - it will be viewable as an HTML file.
 
-If you would like to find out more about how FastQC works and what the plot shows then visit the [project website] (http://www.bioinformatics.babraham.ac.uk/projects/fastqc/). This [link](https://github.com/s-andrews/FastQC) is to the FastQC github page.
+If you would like to find out more about how FastQC works and what the plot shows then visit the 
+[project website](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/). Or visit the [FastQC](https://github.com/s-andrews/FastQC) FastQC github page.
 
 ### 3. Demultiplexing
 
@@ -102,7 +103,14 @@ This step of the program will ask the user to type the `sickle` command to later
 
 For more information about how to integrate pair-end reading and other options, visit the [sickle](https://github.com/najoshi/sickle) github page.
 
-### 5. Alignment
+### 5. Alignment & Variant calling
 
+The program will now perform a Burrows-Wheeler alignment and variant call - enter the `bwa`, `samtools`, and `bcftools` commands when prompted.
 
+For more information about how the alignment works, troubleshooting, or author contact information visit the offical [BWA](http://bio-bwa.sourceforge.net/) page.
 
+To learn more about SamTools and whats included in the package, visit the [SamTools](https://github.com/samtools/) github page. BCFTools is included under the SamTools umbrella and can be found [here](https://github.com/samtools/bcftools). BCFTools will output a .vcf file which contains genetype information.
+
+## Credits
+
+This program was created by Bram Ratz, Ian Lee, and Gurkamal Deol at the University of Guelph. A special thanks to Bram Ratz for carrying the team. 
