@@ -6,6 +6,8 @@ usage () {
   echo "Usage: $0 [-b <barcode file.txt>] [-f <fastq file.fastq>] [-S <sam file.sam>] [-B <bam file.bam>] [-r <reference genome>]" 1>&2; exit 1;
 }
 
+#This uses getopts and a while loop to allow the user to put data in as arguments
+#the way this is set up it will only allow you to continue if you add data to all three fields. Otherwise the usage function will echo an error and show the user the appropriate format to use 
 while getopts ":b:f:S:B:r:" o; do
   case "${o}" in
     b )
@@ -40,16 +42,20 @@ while getopts ":b:f:S:B:r:" o; do
 done
 shift $((OPTIND-1))
 
+#checking to make sure that both the barcode file and the ref genome are there
+#if not a error message will echo then the usage function will flash the correct way to add arguments to the script and exit the script 
 if [ -z "${b}" ] || [ -z "${r}" ]; then
+  echo -en "\nNo file found \nBoth of these arguments must be specified with files to continue."
   usage
 fi
 
-#this generates eror message if a fastq, sam, or bam file isnt entered
+#this generates eror message if a fastq, sam, or bam file isnt entered, and will exit the script
 if [ -z "${f}" ] && [ -z "${S}" ] && [ -z "${B}" ]; then
   echo -en "\nNo file found \nOne of these arguments must be passed a file \n"
   usage
 fi
 
+#what variables are present
 echo "b = ${b}"
 echo "f = ${f}"
 echo "S = ${S}"
@@ -77,7 +83,7 @@ press_enter () {
   echo -en "\nPress Enter to continue"
 }
 
-#so this menu will in theory will set up everything
+#so this menu will set up everything, allowing you to pick what analysis you want done 
 #create menu to work from
 selection=
 until [ "$selection" = "0" ]; do
@@ -89,7 +95,7 @@ until [ "$selection" = "0" ]; do
 
   0 - end the program (will exit the program)
   "
-
+#allow the user to select an option to continue
   echo -n "Enter selection: "
   read selection
   echo ""
@@ -100,7 +106,7 @@ until [ "$selection" = "0" ]; do
 
     mkdir -pv variant_calling
 
-    #now copy
+    #now copy files into that directory
     cp $BARCODES variant_calling
     cp $RAW_FASTQ variant_calling
     cp $REF variant_calling
@@ -115,16 +121,14 @@ until [ "$selection" = "0" ]; do
 
     cd variant_calling
 
-    #print working directory
-    pwd
-
     #make directories for our ref genome and fastq file(s)
     echo "$USER_NAME making some directories for your data"
 
     mkdir -pv raw/ref_genome
     mkdir -pv raw/fastq_files
     mkdir -pv raw/barcodes
-
+    
+#move data to approprite directories 
     mv $BARCODES raw/barcodes
     mv $RAW_FASTQ raw/fastq_files
     mv $REF raw/ref_genome
@@ -138,13 +142,13 @@ until [ "$selection" = "0" ]; do
 
       0 - return to current working directory
       "
-
+#user picks an option to continue 
       echo -n "Enter selection: "
       read selection
       echo ""
       case $selection in
         1 )
-          echo "Enter path to FastQC on your computer: "
+          echo "Enter the command for FastQC tool on your computer: "
           read -r FastQC
           echo ""
           TOOL_FASTQC=$FastQC
@@ -154,7 +158,8 @@ until [ "$selection" = "0" ]; do
           read -p "[y/n]: " choice
           case "$choice" in
             y|Y )
-              xdg-open raw/fastq_files/*.html
+              #opens a separate window to view the fastqc report 
+              xdg-open raw/fastq_files/*.html 
               press_enter
               ;;
             n|N )
@@ -175,6 +180,7 @@ until [ "$selection" = "0" ]; do
         * )
         echo "Please enter 1 or 0"
         press_enter
+        ;;
       esac
     done
 
@@ -203,9 +209,6 @@ until [ "$selection" = "0" ]; do
     #$TOOL_SABRE se -f raw/fastq_files/*.fastq -b raw/barcodes/*.txt -u SABRE_DATA.fastq
 
     echo "sabre complete"
-
-    #move file
-    #mv SABRE_DATA.fastq raw/fastq_sabre
 
     echo ==================================
     #Use sickle program to trim fastq files
@@ -248,15 +251,15 @@ until [ "$selection" = "0" ]; do
     cd variant_calling
 
     #need to load paths for BWA and samtools
-    echo "$USER_NAME enter the path to BWA on your computer, making it into a variable: "
+    echo "$USER_NAME enter the command for BWA on your computer, making it into a variable: "
     read bwa
       TOOL_BWA=$bwa
 
-    echo "$USER_NAME enter the path to samtools on your computer, making it into a variable: "
+    echo "$USER_NAME enter the command for samtools on your computer, making it into a variable: "
     read samtools
       TOOL_SAMTOOLS=$samtools
 
-      echo "$USER_NAME enter the path to bcftools on your computer, making it into a variable: "
+      echo "$USER_NAME enter the command for bcftools on your computer, making it into a variable: "
       read bcftools
         TOOL_BCFTOOLS=$bcftools
 
@@ -352,9 +355,6 @@ until [ "$selection" = "0" ]; do
 
     cd variant_calling
 
-    #print working directory
-    pwd
-
     #make directories for our ref genome and fastq file(s)
     echo "$USER_NAME making some directories for your data"
 
@@ -362,20 +362,21 @@ until [ "$selection" = "0" ]; do
     mkdir -pv raw/barcodes
     mkdir -pv raw/raw_sam
 
+#move files to correct directories
     mv $BARCODES raw/barcodes
     mv $REF raw/ref_genome
     mv $RAW_SAM raw/raw_sam
 
     #need to load some programs
-    echo "$USER_NAME enter the path to BWA on your computer, making it into a variable: "
+    echo "$USER_NAME enter the command for BWA on your computer, making it into a variable: "
     read bwa
       TOOL_BWA=$bwa
 
-    echo "$USER_NAME enter the path to samtools on your computer, making it into a variable: "
+    echo "$USER_NAME enter the command for samtools on your computer, making it into a variable: "
     read samtools
       TOOL_SAMTOOLS=$samtools
 
-      echo "$USER_NAME enter the path to bcftools on your computer, making it into a variable: "
+      echo "$USER_NAME enter the command for bcftools on your computer, making it into a variable: "
       read bcftools
         TOOL_BCFTOOLS=$bcftools
 
@@ -392,10 +393,7 @@ until [ "$selection" = "0" ]; do
     mkdir -pv results/bam
     mkdir -pv results/vcf
 
-    #now going to create a for loop to run the variant calling workflow on however many fastq files we have
-    #remember the files we are using are in the 'trimmed reads' directory and are called FASTQ_TRIMMED.fq
-    #this should be able to handle as many files as possible
-
+    #now going to create a for loop to run the variant calling workflow on however many sam files are found in the directory raw_sam
     for reads in raw/raw_sam/*.sam
       do
         NAME=$( basename $reads .sam ) #extracts the name of the file without the path and the .fq extention and assigns it to the variable name
@@ -460,10 +458,7 @@ until [ "$selection" = "0" ]; do
       echo "$USER_NAME moving you to variant_calling directory"
 
       cd variant_calling
-
-      #print working directory
-      pwd
-
+      
       #make directories for our ref genome and fastq file(s)
       echo "$USER_NAME making some directories for your data"
 
@@ -471,21 +466,22 @@ until [ "$selection" = "0" ]; do
       mkdir -pv raw/barcodes
       mkdir -pv raw/raw_bam
 
+#move files to the correct directories
       mv $BARCODES raw/barcodes
       mv $REF raw/ref_genome
       mv $RAW_BAM raw/raw_bam
 
       #need to load some programs
       need to load paths for BWA and samtools
-      echo "$USER_NAME enter the path to BWA on your computer, making it into a variable: "
+      echo "$USER_NAME enter the command for BWA on your computer, making it into a variable: "
       read bwa
         TOOL_BWA=$bwa
 
-      echo "$USER_NAME enter the path to samtools on your computer, making it into a variable: "
+      echo "$USER_NAME enter the command for samtools on your computer, making it into a variable: "
       read samtools
         TOOL_SAMTOOLS=$samtools
 
-        echo "$USER_NAME enter the path to bcftools on your computer, making it into a variable: "
+        echo "$USER_NAME enter the command for bcftools on your computer, making it into a variable: "
         read bcftools
           TOOL_BCFTOOLS=$bcftools
 
@@ -501,9 +497,7 @@ until [ "$selection" = "0" ]; do
       mkdir -pv results/bam
       mkdir -pv results/vcf
 
-      #now going to create a for loop to run the variant calling workflow on however many fastq files we have
-      #remember the files we are using are in the 'trimmed reads' directory and are called FASTQ_TRIMMED.fq
-      #this should be able to handle as many files as possible
+      #now going to create a for loop to run the variant calling workflow on however many bam files are in raw_bam
 
       for reads in raw/raw_bam/*.bam
         do
