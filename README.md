@@ -1,14 +1,13 @@
-# BINF6410-assignment-2
-### Possible names: FaQ2Var (fastq to variant calling), FaBaSa-var [(Fa)stq, (Ba)m, (Sa)m], VCF-gen (generator), VCF-ninja, VarFlow, 2Fast2Variant, FaBSVar-pipe, VariantPlumber (cause its a pipe LOL)
-
+# FaQ2Var
 ## About
 
-[name] is a pipeline designed to be used with fastq type files containing genomic information which returns a variant calling formart (VCF) file. However, the following intermediary file types may be used as well:
+FaQ2Var (fastq to variant calling) is a pipeline designed to be used with fastq type files containing genomic information which returns a variant calling formart (VCF) file. However, the following intermediary file types may be used as well:
 
 * .FASTQ
 * .BAM
 * .SAM
-* .VCF
+
+The output of the pipeline is a .VCF file extension which contains a genotype information. At the moemnt the program allows users to jump into various points of the pipeline using processed files such as `.BAM` and `.SAM`.
 
 ## Requirements
 
